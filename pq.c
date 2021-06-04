@@ -4,13 +4,16 @@
  * you need in this file to implement a priority queue.  Make sure to add your
  * name and @oregonstate.edu email address below:
  *
- * Name:
- * Email:
+ * Name: Greggory Hickman
+ * Email: hickmang@oregonstate.edu
  */
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "pq.h"
+#include "dynarray.h"
 
 /*
  * This is the structure that represents a priority queue.  You must define
@@ -18,7 +21,14 @@
  * in addition, you want to define an element struct with both data and priority, 
  * corresponding to the elements of the priority queue. 
  */
-struct pq;
+struct pq {
+  struct dynarray* brain;
+};
+
+struct element {
+  void* data;
+  int priority;
+};
 
 
 /*
@@ -26,7 +36,16 @@ struct pq;
  * return a pointer to it.
  */
 struct pq* pq_create() {
-  return NULL;
+
+  //Initialize the new priority queue
+  struct pq* new_pq = malloc(sizeof(struct pq));
+  assert(new_pq);
+
+  //Initialize the "brain"
+  new_pq->brain = dynarray_create();
+
+  return new_pq;
+
 }
 
 
@@ -39,6 +58,11 @@ struct pq* pq_create() {
  *   pq - the priority queue to be destroyed.  May not be NULL.
  */
 void pq_free(struct pq* pq) {
+  
+  assert(pq);
+
+  dynarray_free(pq->brain); //Free the brain
+  free(pq); //Free the queue
 
 }
 
@@ -55,7 +79,11 @@ void pq_free(struct pq* pq) {
  *   Should return 1 if pq is empty and 0 otherwise.
  */
 int pq_isempty(struct pq* pq) {
-  return 1;
+
+  //If empty, 1. If not empty, 0. Yee haw.
+  if (dynarray_length(pq->brain) == 0) return 1;
+  else return 0;
+
 }
 
 
@@ -78,8 +106,38 @@ int pq_isempty(struct pq* pq) {
  */
 void pq_insert(struct pq* pq, void* data, int priority) {
 
-}
+  //Put together the element with the passed in data
+  struct element* element;
+  element->data = data;
+  element->priority = priority;
 
+  int currentAddress = dynarray_length(pq->brain); //Get the current address of the element that we just added (array length - 1)
+
+  dynarray_insert(pq->brain, currentAddress, (void*)element); //Insert the element into the next available spot in the tree
+  
+  printf("Poop - %d: %d\n", currentAddress, ((struct element*)dynarray_get(pq->brain, 0))->priority);
+
+  //Stop if the element is at the top of the heap
+  while (currentAddress != 0) {
+
+    //Compare the element to it's parent
+    int parentAddress = (int)(currentAddress / 2);
+
+    if (dynarray_get(pq->brain, parentAddress) < dynarray_get(pq->brain, currentAddress)) { //If parent priority < current node priority...
+      
+      //...swap them
+      void* temp = dynarray_get(pq->brain, currentAddress);
+      dynarray_set(pq->brain, currentAddress, dynarray_get(pq->brain, parentAddress));
+      dynarray_set(pq->brain, parentAddress, temp);
+
+    }
+    else {
+      return;
+    }
+
+  }
+ 
+}
 
 /*
  * This function should return the data of the first element in a priority
@@ -94,7 +152,8 @@ void pq_insert(struct pq* pq, void* data, int priority) {
  *   max priority value.
  */
 void* pq_max(struct pq* pq) {
-  return NULL;
+  struct element* element = (struct element*)(dynarray_get(pq->brain, 0));
+  return element->data;
 }
 
 
@@ -111,7 +170,8 @@ void* pq_max(struct pq* pq) {
  *   with highest priority value.
  */
 int pq_max_priority(struct pq* pq) {
-  return 0;
+  struct element* element = (struct element*)(dynarray_get(pq->brain, 0));
+  return element->priority;
 }
 
 
@@ -129,5 +189,6 @@ int pq_max_priority(struct pq* pq) {
  *   highest priority value.
  */
 void* pq_max_dequeue(struct pq* pq) {
-  return NULL;
+  struct element* element = (struct element*)(dynarray_get(pq->brain, 0));
+  
 }
