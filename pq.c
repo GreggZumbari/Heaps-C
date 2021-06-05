@@ -106,26 +106,38 @@ int pq_isempty(struct pq* pq) {
  */
 void pq_insert(struct pq* pq, void* data, int priority) {
 
+  printf("Tree Print:\n");
+  for (int i = 0; i < dynarray_length(pq->brain); i++) {
+    printf("%d, ", ((struct element*)dynarray_get(pq->brain, i))->priority);
+    
+    if (i == 0 || i == 2 || i == 6 || i == 14 || i == 30 || i == 62 || i == 126) {
+      printf("\n");
+    }
+
+  }
+  printf("\n\n");
+
   //Put together the element with the passed in data
-  struct element* element;
+  struct element* element = malloc(sizeof(struct element));
   element->data = data;
   element->priority = priority;
 
   int currentAddress = dynarray_length(pq->brain); //Get the current address of the element that we just added (array length - 1)
 
-  dynarray_insert(pq->brain, currentAddress, (void*)element); //Insert the element into the next available spot in the tree
+  dynarray_insert(pq->brain, -1, element); //Insert the element into the next available spot in the tree
   
-  printf("Poop - %d: %d\n", currentAddress, ((struct element*)dynarray_get(pq->brain, 0))->priority);
+  //printf("Insert - %d: %d\n", currentAddress, ((struct element*)dynarray_get(pq->brain, currentAddress))->priority);
 
   //Stop if the element is at the top of the heap
   while (currentAddress != 0) {
 
     //Compare the element to it's parent
-    int parentAddress = (int)(currentAddress / 2);
+    int parentAddress = (int)((currentAddress + 1) / 2) - 1;
 
-    if (dynarray_get(pq->brain, parentAddress) < dynarray_get(pq->brain, currentAddress)) { //If parent priority < current node priority...
+    //If parent priority < current node priority...
+    if (((struct element*)dynarray_get(pq->brain, parentAddress))->priority < ((struct element*)dynarray_get(pq->brain, currentAddress))->priority) {
       
-      //...swap them
+      //...then swap them
       void* temp = dynarray_get(pq->brain, currentAddress);
       dynarray_set(pq->brain, currentAddress, dynarray_get(pq->brain, parentAddress));
       dynarray_set(pq->brain, parentAddress, temp);
@@ -189,6 +201,6 @@ int pq_max_priority(struct pq* pq) {
  *   highest priority value.
  */
 void* pq_max_dequeue(struct pq* pq) {
-  struct element* element = (struct element*)(dynarray_get(pq->brain, 0));
-  
+  struct element* element = (struct element*)(dynarray_get(pq->brain, 0)); //This is highest priority boy
+  return NULL; 
 }
