@@ -128,7 +128,7 @@ void pq_insert(struct pq* pq, void* data, int priority) {
 
   dynarray_insert(pq->brain, -1, element); //Insert the element into the next available spot in the tree
   
-  //printf("Insert - %d: %d\n", currentAddress, ((struct element*)dynarray_get(pq->brain, currentAddress))->priority);
+  printf("Insert - %d: %d\n", currentAddress, ((struct element*)dynarray_get(pq->brain, currentAddress))->priority);
 
   //Stop if the element is at the top of the heap
   while (currentAddress != 0) {
@@ -210,51 +210,53 @@ void* pq_max_dequeue(struct pq* pq) {
   dynarray_set(pq->brain, 0, (struct element*)dynarray_get(pq->brain, -1));
   dynarray_remove(pq->brain, -1);
 
-  _print_heap(pq->brain);
-
   //If the element's priority is lower than either of its children, then swap them!
   int currentAddress = 0;
 
   while (1) {
+
     int leftAddress = ((currentAddress + 1) * 2) - 1;
     int rightAddress = (currentAddress + 1) * 2;
-
-    printf("Test 6\n");
+    
     //If there is no left, then we are done here. Return the original root value.
     if (leftAddress >= dynarray_length(pq->brain)) {
-      printf("Test 7\n");
       return rootValue;
     }
     
     //If current < left
     else if (((struct element*)dynarray_get(pq->brain, currentAddress))->priority < ((struct element*)dynarray_get(pq->brain, leftAddress))->priority) {
-      printf("Test 8\n");
+
       //This is where the swapping happens
       void* temp = dynarray_get(pq->brain, currentAddress);
       dynarray_set(pq->brain, currentAddress, dynarray_get(pq->brain, leftAddress));
       dynarray_set(pq->brain, leftAddress, temp);
 
       currentAddress = leftAddress;
-      printf("Test 9\n");
+
     }
 
     //If there is no right, then we are done here. Return the original root value.
     else if (rightAddress >= dynarray_length(pq->brain)) {
-      printf("Test 10\n");
       return rootValue;
     }
 
     //If current < right
     else if (((struct element*)dynarray_get(pq->brain, currentAddress))->priority < ((struct element*)dynarray_get(pq->brain, rightAddress))->priority) {
-      printf("Test 11\n");
+
       //This is where the swapping happens
       void* temp = dynarray_get(pq->brain, currentAddress);
       dynarray_set(pq->brain, currentAddress, dynarray_get(pq->brain, rightAddress));
       dynarray_set(pq->brain, rightAddress, temp);
 
       currentAddress = rightAddress;
-      printf("Test 12\n");
+
+    }
+
+    else {
+      return rootValue;
     }
   }
+
+  return rootValue;
 
 }
