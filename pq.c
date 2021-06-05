@@ -86,6 +86,19 @@ int pq_isempty(struct pq* pq) {
 
 }
 
+void _print_heap(struct dynarray* dynarray) {
+  printf("Heap Print:\n");
+  for (int i = 0; i < dynarray_length(dynarray); i++) {
+    printf("%d, ", ((struct element*)dynarray_get(dynarray, i))->priority);
+    
+    if (i == 0 || i == 2 || i == 6 || i == 14 || i == 30 || i == 62 || i == 126) {
+      printf("\n");
+    }
+
+  }
+  printf("\n\n");
+}
+
 
 /*
  * This function should insert a given element into a priority queue with a
@@ -105,17 +118,6 @@ int pq_isempty(struct pq* pq) {
  *     be the FIRST one returned.
  */
 void pq_insert(struct pq* pq, void* data, int priority) {
-
-  printf("Tree Print:\n");
-  for (int i = 0; i < dynarray_length(pq->brain); i++) {
-    printf("%d, ", ((struct element*)dynarray_get(pq->brain, i))->priority);
-    
-    if (i == 0 || i == 2 || i == 6 || i == 14 || i == 30 || i == 62 || i == 126) {
-      printf("\n");
-    }
-
-  }
-  printf("\n\n");
 
   //Put together the element with the passed in data
   struct element* element = malloc(sizeof(struct element));
@@ -164,7 +166,7 @@ void pq_insert(struct pq* pq, void* data, int priority) {
  *   max priority value.
  */
 void* pq_max(struct pq* pq) {
-  struct element* element = (struct element*)(dynarray_get(pq->brain, 0));
+  struct element* element = ((struct element*)dynarray_get(pq->brain, 0));
   return element->data;
 }
 
@@ -182,7 +184,7 @@ void* pq_max(struct pq* pq) {
  *   with highest priority value.
  */
 int pq_max_priority(struct pq* pq) {
-  struct element* element = (struct element*)(dynarray_get(pq->brain, 0));
+  struct element* element = ((struct element*)dynarray_get(pq->brain, 0));
   return element->priority;
 }
 
@@ -201,6 +203,58 @@ int pq_max_priority(struct pq* pq) {
  *   highest priority value.
  */
 void* pq_max_dequeue(struct pq* pq) {
-  struct element* element = (struct element*)(dynarray_get(pq->brain, 0)); //This is highest priority boy
-  return NULL; 
+
+  void* rootValue = pq_max(pq); //This is highest priority data value. Will return this later when we've fixed up the rest of the heap.
+
+  //Move the last element in the array to the root
+  dynarray_set(pq->brain, 0, (struct element*)dynarray_get(pq->brain, -1));
+  dynarray_remove(pq->brain, -1);
+
+  _print_heap(pq->brain);
+
+  //If the element's priority is lower than either of its children, then swap them!
+  int currentAddress = 0;
+
+  while (1) {
+    int leftAddress = ((currentAddress + 1) * 2) - 1;
+    int rightAddress = (currentAddress + 1) * 2;
+
+    printf("Test 6\n");
+    //If there is no left, then we are done here. Return the original root value.
+    if (leftAddress >= dynarray_length(pq->brain)) {
+      printf("Test 7\n");
+      return rootValue;
+    }
+    
+    //If current < left
+    else if (((struct element*)dynarray_get(pq->brain, currentAddress))->priority < ((struct element*)dynarray_get(pq->brain, leftAddress))->priority) {
+      printf("Test 8\n");
+      //This is where the swapping happens
+      void* temp = dynarray_get(pq->brain, currentAddress);
+      dynarray_set(pq->brain, currentAddress, dynarray_get(pq->brain, leftAddress));
+      dynarray_set(pq->brain, leftAddress, temp);
+
+      currentAddress = leftAddress;
+      printf("Test 9\n");
+    }
+
+    //If there is no right, then we are done here. Return the original root value.
+    else if (rightAddress >= dynarray_length(pq->brain)) {
+      printf("Test 10\n");
+      return rootValue;
+    }
+
+    //If current < right
+    else if (((struct element*)dynarray_get(pq->brain, currentAddress))->priority < ((struct element*)dynarray_get(pq->brain, rightAddress))->priority) {
+      printf("Test 11\n");
+      //This is where the swapping happens
+      void* temp = dynarray_get(pq->brain, currentAddress);
+      dynarray_set(pq->brain, currentAddress, dynarray_get(pq->brain, rightAddress));
+      dynarray_set(pq->brain, rightAddress, temp);
+
+      currentAddress = rightAddress;
+      printf("Test 12\n");
+    }
+  }
+
 }
